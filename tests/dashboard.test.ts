@@ -164,3 +164,26 @@ describe("изоляция данных между пользователями"
     expect(await getRecentTransactions(db, "alice", nov)).toEqual([]);
   });
 });
+
+describe("analytics data", () => {
+  it("getDailyTotals и getTopTransactions — по типу, периоду и пользователю", async () => {
+    const { getDailyTotals, getTopTransactions } =
+      await import("@/server/data/analytics");
+    await add("alice", "Продукты", 100, "2026-11-02");
+    await add("alice", "Продукты", 50, "2026-11-02");
+    await add("alice", "Жильё", 9000, "2026-11-01");
+    await add("alice", "Зарплата", 99999, "2026-11-05", "income");
+    await add("alice", "Транспорт", 77777, "2026-10-31");
+    await add("bob", "Продукты", 88888, "2026-11-02");
+
+    expect(await getDailyTotals(db, "alice", nov, "expense")).toEqual([
+      { date: "2026-11-01", total: 9000 },
+      { date: "2026-11-02", total: 150 },
+    ]);
+    const top = await getTopTransactions(db, "alice", nov, "expense", 2);
+    expect(top.map((t) => [t.categoryName, t.amount])).toEqual([
+      ["Жильё", 9000],
+      ["Продукты", 100],
+    ]);
+  });
+});

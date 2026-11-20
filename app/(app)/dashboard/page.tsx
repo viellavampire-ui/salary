@@ -14,7 +14,7 @@ import { PeriodPicker } from "@/components/layout/period-picker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireUser } from "@/lib/dal";
 import { formatMoney, formatPercent } from "@/lib/money";
-import { parsePeriod } from "@/lib/period";
+import { parsePeriod, toISODate } from "@/lib/period";
 import { cn } from "@/lib/utils";
 import { getDashboard } from "@/server/queries/dashboard";
 
@@ -69,7 +69,12 @@ async function DashboardContent({
     { period: one(sp.period), from: one(sp.from), to: one(sp.to) },
     { monthStartDay: user.monthStartDay },
   );
-  const data = await getDashboard(user.id, period, user.monthStartDay);
+  const data = await getDashboard(
+    user.id,
+    period,
+    user.monthStartDay,
+    toISODate(new Date()),
+  );
   const { kpis, currency } = { kpis: data.kpis, currency: user.currency };
 
   if (!data.hasAny) {
@@ -85,7 +90,11 @@ async function DashboardContent({
     );
   }
 
-  const vs = compareLabel(data.prev.label, period.kind);
+  const vs = data.compareText ?? compareLabel(data.prev.label, period.kind);
+  // «1–20 окт.» или «Октябрь 2026» — с чем сравниваем
+  const prevName = data.compareText
+    ? data.compareText.slice(2)
+    : data.prev.label;
   const transactionsHref =
     period.kind === "month"
       ? `/transactions?period=${period.key}`
@@ -114,7 +123,7 @@ async function DashboardContent({
           valueClassName={cn(kpis.balance < 0 && "text-expense")}
           footer={
             <p className="text-xs leading-4 text-muted-foreground">
-              {data.prev.label}:{" "}
+              {prevName}:{" "}
               <span className="font-medium">
                 {formatMoney(kpis.previous.balance, currency, {
                   sign: "always",

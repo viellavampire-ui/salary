@@ -44,6 +44,8 @@
   --chart-expense: #dc2626;
   --chart-balance: #4f46e5;
   --chart-bar: #4f46e5;
+  /* Приём «выделение»: прошлый период — приглушённый серый */
+  --chart-previous: #64748b;
 }
 
 .dark {
@@ -79,6 +81,7 @@
   --chart-expense: #ef4444;
   --chart-balance: #6366f1;
   --chart-bar: #6366f1;
+  --chart-previous: #64748b;
 }
 
 /* Токены → утилиты Tailwind (bg-surface, text-income, rounded-lg …).
@@ -122,6 +125,7 @@
   --color-chart-expense: var(--chart-expense);
   --color-chart-balance: var(--chart-balance);
   --color-chart-bar: var(--chart-bar);
+  --color-chart-previous: var(--chart-previous);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius);

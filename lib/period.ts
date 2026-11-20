@@ -330,3 +330,84 @@ export function formatDayHeader(iso: ISODate, currentYear?: number): string {
   const year = Number(iso.slice(0, 4));
   return currentYear && year !== currentYear ? `${label} ${year}` : label;
 }
+
+/* ───────────── Навигация по периодам (аналитика) ───────────── */
+
+export type FixedPeriodKind = Exclude<PeriodKind, "custom">;
+
+/** Период выбранного типа, в который попадает дата (якорь). */
+export function periodOfKind(
+  kind: FixedPeriodKind,
+  anchor: ISODate,
+  monthStartDay = 1,
+): Period {
+  const month = monthKeyForDate(anchor, monthStartDay);
+  const { y, m } = parseMonth(month);
+  if (kind === "month") return monthPeriod(month, monthStartDay);
+  if (kind === "quarter")
+    return quarterPeriod(y, Math.ceil(m / 3), monthStartDay);
+  return yearPeriod(y, monthStartDay);
+}
+
+/** Следующий период такой же длины (обратная к previousPeriod). */
+export function nextPeriod(p: Period, monthStartDay = 1): Period {
+  if (p.kind === "custom") {
+    const length = daysInRange(p);
+    const from = addDays(p.to, 1);
+    return customPeriod({ from, to: addDays(from, length - 1) });
+  }
+  return periodOfKind(p.kind, addDays(p.to, 1), monthStartDay);
+}
+
+/** Параметры URL для периода: ?period=… или ?from=…&to=… */
+export function periodSearch(p: Period): string {
+  const params = new URLSearchParams();
+  if (p.kind === "custom") {
+    params.set("from", p.from);
+    params.set("to", p.to);
+  } else {
+    params.set("period", p.key);
+  }
+  return params.toString();
+}
+
+/**
+ * Честное сравнение для периода, который ещё идёт: столько же первых дней
+ * прошлого периода (1–20 ноября ↔ 1–20 октября), а не весь прошлый период.
+ * Для завершённого периода — прошлый период целиком.
+ */
+export function comparableRange(
+  period: DateRange,
+  previous: DateRange,
+  today: ISODate,
+): DateRange & { partial: boolean } {
+  if (today < period.from || today >= period.to) {
+    return { ...previous, partial: false };
+  }
+  const elapsed = daysInRange({ from: period.from, to: today });
+  const to = addDays(previous.from, elapsed - 1);
+  return {
+    from: previous.from,
+    to: to < previous.to ? to : previous.to,
+    partial: true,
+  };
+}
+
+const dayMonth = new Intl.DateTimeFormat("ru-RU", {
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+});
+
+/**
+ * Подпись сравнения для неполного периода, иначе null:
+ * в пределах месяца — «к 1–20 окт.», иначе «к 1 янв. – 20 нояб. 2025».
+ */
+export function comparableLabel(range: DateRange & { partial: boolean }) {
+  if (!range.partial) return null;
+  if (range.from.slice(0, 7) === range.to.slice(0, 7)) {
+    const from = Number(range.from.slice(8));
+    return `к ${from}–${dayMonth.format(toUTC(range.to))}`;
+  }
+  return `к ${formatRangeLabel(range)}`;
+}

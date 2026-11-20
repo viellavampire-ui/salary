@@ -23,19 +23,23 @@ export function RecentTransactions({
   items,
   currency,
   allHref,
+  title = "Последние операции",
+  emptyText = "В этом периоде операций нет",
 }: {
   items: RecentItem[];
   currency: string;
   allHref: string;
+  title?: string;
+  emptyText?: string;
 }) {
   return (
     <section
-      aria-label="Последние операции"
+      aria-label={title}
       className="flex flex-col gap-3 rounded-lg border bg-card p-4 md:p-6"
     >
       <header className="flex items-center justify-between gap-3">
         <h2 className="text-base leading-6 font-semibold sm:text-lg sm:leading-7">
-          Последние операции
+          {title}
         </h2>
         <Link
           href={allHref}
@@ -47,7 +51,7 @@ export function RecentTransactions({
       </header>
       {items.length === 0 ? (
         <p className="py-6 text-center text-sm text-muted-foreground">
-          В этом периоде операций нет
+          {emptyText}
         </p>
       ) : (
         <ul className="flex flex-col">
