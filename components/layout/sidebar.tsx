@@ -1,3 +1,4 @@
+import { CurrentNotifications } from "@/components/notifications/current-notifications";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CurrentUserMenu } from "./current-user-menu";
 import { Logo } from "./logo";
@@ -18,7 +19,8 @@ export function Sidebar() {
           <SidebarNav />
         </div>
       </TooltipProvider>
-      <div className="border-t p-3 lg:p-4">
+      <div className="flex flex-col gap-1 border-t p-3 lg:p-4">
+        <CurrentNotifications variant="sidebar" />
         <CurrentUserMenu variant="sidebar" />
       </div>
     </aside>

@@ -2,12 +2,14 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { CategoryIcon } from "@/components/categories/category-icon";
+import { showBudgetAlerts } from "@/components/notifications/alert-toasts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -80,6 +82,8 @@ export function TransactionForm({
   onDone: () => void;
 }) {
   const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
+  const openHref = (href: string) => router.push(href);
   const [deleting, startDelete] = useTransition();
   const today = toISODate(new Date());
 
@@ -149,6 +153,7 @@ export function TransactionForm({
       const result = await updateTransactionAction({ ...raw, id: editing.id });
       if (!applyResult(result)) return;
       toast.success("Операция сохранена");
+      if (result.ok) showBudgetAlerts(result.data.alerts, currency, openHref);
       onDone();
       return;
     }
@@ -158,7 +163,7 @@ export function TransactionForm({
     rememberCategory(values.type, values.categoryId);
     onDone();
     if (result.ok) {
-      const { id } = result.data;
+      const { id, alerts } = result.data;
       toast.success("Операция добавлена", {
         action: {
           label: "Отменить",
@@ -168,6 +173,7 @@ export function TransactionForm({
           },
         },
       });
+      showBudgetAlerts(alerts, currency, openHref);
     }
   }
 
@@ -186,6 +192,7 @@ export function TransactionForm({
             onClick: async () => {
               const undo = await restoreTransactionAction(snapshot);
               if (!undo.ok) toast.error(undo.error);
+              else showBudgetAlerts(undo.data.alerts, currency, openHref);
             },
           },
         });

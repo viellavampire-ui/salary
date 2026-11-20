@@ -171,7 +171,47 @@ export const budgets = sqliteTable(
   (t) => [uniqueIndex("budget_user_category_uq").on(t.userId, t.categoryId)],
 );
 
+/**
+ * Уведомления в приложении (сейчас — о бюджетах). Уникальный индекс
+ * гарантирует: не больше одного уведомления на порог, бюджет и месяц.
+ */
+export const notifications = sqliteTable(
+  "notification",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    /** budget_warning — потрачено ≥ 80%, budget_over — лимит превышен */
+    kind: text("kind").$type<NotificationKind>().notNull(),
+    categoryId: text("category_id")
+      .notNull()
+      .references(() => categories.id, { onDelete: "cascade" }),
+    /** Финансовый месяц YYYY-MM */
+    month: text("month").notNull(),
+    /** Потрачено и лимит в момент срабатывания, в копейках */
+    spent: integer("spent").notNull(),
+    limit: integer("limit_amount").notNull(),
+    readAt: integer("read_at", { mode: "timestamp_ms" }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex("notification_once_uq").on(
+      t.userId,
+      t.categoryId,
+      t.month,
+      t.kind,
+    ),
+    index("notification_user_created_idx").on(t.userId, t.createdAt),
+  ],
+);
+
+export type NotificationKind = "budget_warning" | "budget_over";
+
 export type User = typeof user.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 export type Budget = typeof budgets.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;

@@ -163,6 +163,21 @@ GOOGLE_CLIENT_SECRET=...
 
 Индексы: `UNIQUE(userId, categoryId)`.
 
+### 5.4a `notification`
+
+| Поле | Тип | Ограничения |
+|------|-----|-------------|
+| `id` | TEXT | PK |
+| `userId` | TEXT | FK → user.id, CASCADE |
+| `kind` | TEXT | `'budget_warning'` (≥ 80%) \| `'budget_over'` (> 100%) |
+| `categoryId` | TEXT | FK → category.id, CASCADE |
+| `month` | TEXT | финансовый месяц `YYYY-MM` |
+| `spent`, `limit_amount` | INTEGER | потрачено и лимит в момент срабатывания, копейки |
+| `readAt` | INTEGER | null — не прочитано |
+| `createdAt` | INTEGER | |
+
+Индексы: `UNIQUE(userId, categoryId, month, kind)` — не больше одного уведомления на порог, бюджет и месяц; `INDEX(userId, createdAt)`.
+
 ### 5.5 Связи
 ```
 user 1──* category 1──* transaction
@@ -202,6 +217,13 @@ user 1──* budget *──1 category
 | `deleteAccount` | `{ confirm: 'УДАЛИТЬ' }` | `auth.api.deleteUser`, каскадное удаление |
 
 После мутации: `revalidatePath('/dashboard')`, `revalidatePath('/transactions')` и т.д.
+
+## 7a. Уведомления о бюджетах
+
+- Проверка — `evaluateBudgetAlerts` (`server/data/notifications.ts`) после `createTransaction` / `updateTransaction` / `restoreTransaction` (расходы) и `upsertBudget`. Считается **текущий финансовый месяц** (правка старых операций не будит уведомления задним числом).
+- Статус по `budgetStatus`: 80–100% → `budget_warning`, > 100% → `budget_over` (если траты сразу перескочили 100% — только «превышен»). Вставка `onConflictDoNothing` по уникальному индексу.
+- Actions возвращают `alerts` — только что созданные уведомления; клиент показывает всплывающие сообщения (`showBudgetAlerts`). Сбой проверки не ломает сохранение операции.
+- Колокольчик (`components/notifications`): счётчик непрочитанных в сайдбаре и шапке на телефоне, последние 20 уведомлений; клик ведёт на `/budgets?period=YYYY-MM` и отмечает прочитанным; `markNotificationsReadAction` — выбранные или все.
 
 ## 8. Запросы и агрегации
 

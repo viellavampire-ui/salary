@@ -105,6 +105,19 @@ for (const theme of ["light", "dark"] as const) {
       });
     }
 
+    test("список уведомлений", async ({ browser }) => {
+      const page = await newPage(browser, { storageState: STATE });
+      await openReady(page, "/dashboard", theme);
+      await page
+        .locator("aside")
+        .getByRole("button", { name: /Уведомления/ })
+        .click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await page.waitForTimeout(300);
+      await expectNoAxeViolations(page);
+      await page.context().close();
+    });
+
     test("форма новой операции", async ({ browser }) => {
       const page = await newPage(browser, { storageState: STATE });
       await openReady(page, "/dashboard?new=1", theme);

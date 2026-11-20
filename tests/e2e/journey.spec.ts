@@ -94,6 +94,20 @@ test("путь пользователя от регистрации до экс�
     await expect(card).toContainText("Близко к лимиту");
     await expect(card).toContainText(/83\s%/);
 
+    // лимит меньше уже потраченного → уведомление «потрачено 83 %»
+    await expect(
+      page.getByText(/Бюджет «Продукты»: потрачено 83\s%/).first(),
+    ).toBeVisible();
+    const bell = page
+      .locator("aside")
+      .getByRole("button", { name: /Уведомления/ });
+    await expect(bell).toHaveAccessibleName(/1 непрочитанное/);
+    await bell.click();
+    await expect(page.getByRole("dialog")).toContainText("Бюджет «Продукты»");
+    await page.getByRole("button", { name: "Отметить все" }).click();
+    await expect(bell).toHaveAccessibleName(/нет непрочитанных/);
+    await page.keyboard.press("Escape");
+
     await page.locator("aside").getByRole("link", { name: "Дашборд" }).click();
     await expect(
       page.getByRole("region", { name: "Бюджеты под угрозой" }),

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { CategoryIcon } from "@/components/categories/category-icon";
+import { showBudgetAlerts } from "@/components/notifications/alert-toasts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,6 +102,7 @@ function BudgetForm({
 }) {
   const editing = state.mode === "edit" ? state : null;
   const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
   const [deleting, startDelete] = useTransition();
 
   const {
@@ -145,6 +148,11 @@ function BudgetForm({
     const result = await upsertBudgetAction(getValues());
     if (!applyResult(result)) return;
     toast.success(editing ? "Лимит изменён" : "Бюджет создан");
+    if (result.ok) {
+      showBudgetAlerts(result.data.alerts, currency, (href) =>
+        router.push(href),
+      );
+    }
     onDone();
   }
 

@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { fail, type ActionResult } from "@/lib/action-result";
+import { fail, ok, type ActionResult } from "@/lib/action-result";
 import { requireUser } from "@/lib/dal";
+import type { BudgetAlert } from "@/lib/notifications";
 import { MAX_AMOUNT_MINOR } from "@/lib/money";
 import { budgetSchema, fieldErrors } from "@/lib/validations";
 import { deleteBudget, upsertBudget } from "@/server/data/budgets";
+import { alertsFor } from "@/server/budget-alerts";
 
 /* Проверка сессии → Zod → слой данных (по userId) → обновление страниц. */
 
@@ -36,13 +38,19 @@ async function run<T>(
 /** Создать или изменить лимит. Сумма приходит строкой из поля ввода. */
 export async function upsertBudgetAction(
   input: unknown,
-): Promise<ActionResult<{ categoryId: string }>> {
+): Promise<ActionResult<{ categoryId: string; alerts: BudgetAlert[] }>> {
   const user = await requireUser();
   const parsed = budgetSchema.safeParse(input);
   if (!parsed.success) {
     return fail("Проверьте поля формы", fieldErrors(parsed.error));
   }
-  return run(() => upsertBudget(db, user.id, parsed.data));
+  return run(async () => {
+    const result = await upsertBudget(db, user.id, parsed.data);
+    if (!result.ok) return result;
+    // Новый или уменьшенный лимит может сразу оказаться превышен
+    const alerts = await alertsFor(user, [parsed.data.categoryId]);
+    return ok({ ...result.data, alerts });
+  });
 }
 
 export async function deleteBudgetAction(

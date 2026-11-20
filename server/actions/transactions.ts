@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { fail, type ActionResult } from "@/lib/action-result";
+import { fail, ok, type ActionResult } from "@/lib/action-result";
 import { requireUser } from "@/lib/dal";
+import type { BudgetAlert } from "@/lib/notifications";
 import {
   fieldErrors,
   transactionSchema,
@@ -19,6 +20,7 @@ import {
   restoreTransaction,
   updateTransaction,
 } from "@/server/data/transactions";
+import { alertsFor } from "@/server/budget-alerts";
 
 /*
  * Проверка сессии → Zod → слой данных (по userId из сессии) → обновление
@@ -42,24 +44,40 @@ async function run<T>(
 
 export async function createTransactionAction(
   input: unknown,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; alerts: BudgetAlert[] }>> {
   const user = await requireUser();
   const parsed = transactionSchema.safeParse(input);
   if (!parsed.success) {
     return fail("Проверьте поля формы", fieldErrors(parsed.error));
   }
-  return run(() => createTransaction(db, user.id, parsed.data));
+  return run(async () => {
+    const result = await createTransaction(db, user.id, parsed.data);
+    if (!result.ok) return result;
+    const alerts =
+      parsed.data.type === "expense"
+        ? await alertsFor(user, [parsed.data.categoryId])
+        : [];
+    return ok({ ...result.data, alerts });
+  });
 }
 
 export async function updateTransactionAction(
   input: unknown,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; alerts: BudgetAlert[] }>> {
   const user = await requireUser();
   const parsed = transactionUpdateSchema.safeParse(input);
   if (!parsed.success) {
     return fail("Проверьте поля формы", fieldErrors(parsed.error));
   }
-  return run(() => updateTransaction(db, user.id, parsed.data));
+  return run(async () => {
+    const result = await updateTransaction(db, user.id, parsed.data);
+    if (!result.ok) return result;
+    const alerts =
+      parsed.data.type === "expense"
+        ? await alertsFor(user, [parsed.data.categoryId])
+        : [];
+    return ok({ ...result.data, alerts });
+  });
 }
 
 export async function deleteTransactionAction(
@@ -73,9 +91,17 @@ export async function deleteTransactionAction(
 
 export async function restoreTransactionAction(
   input: unknown,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; alerts: BudgetAlert[] }>> {
   const user = await requireUser();
   const parsed = transactionSnapshotSchema.safeParse(input);
   if (!parsed.success) return fail("Не удалось восстановить операцию");
-  return run(() => restoreTransaction(db, user.id, parsed.data));
+  return run(async () => {
+    const result = await restoreTransaction(db, user.id, parsed.data);
+    if (!result.ok) return result;
+    const alerts =
+      parsed.data.type === "expense"
+        ? await alertsFor(user, [parsed.data.categoryId])
+        : [];
+    return ok({ ...result.data, alerts });
+  });
 }
