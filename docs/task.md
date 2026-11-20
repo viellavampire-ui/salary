@@ -1,5 +1,7 @@
 # Task — план реализации Salary
 
+> **Статус:** шаги 1–5 выполнены (шаг 1 — у каждого разработчика на своём компьютере). Следующий — шаг 6.
+
 Технический план. Нумерация совпадает с `taskGuide.md` (там те же шаги простыми словами).
 Ссылки: `PRD.md`, `SPEC.md`, `design.md`.
 
@@ -18,7 +20,7 @@
 - 2.4 Первый коммит, push в GitHub.
 
 ## 3. Дизайн-система
-- 3.1 `pnpm dlx shadcn@latest init` (base color: neutral, CSS variables: yes).
+- 3.1 `pnpm dlx shadcn@latest init` (base color: neutral, CSS variables: yes). Конфиг — `components.json`; базовые компоненты лежат в `components/ui`.
 - 3.2 Перенести токены цветов из `design.md §2` в `app/globals.css` (`:root` и `.dark`), включая `--income`, `--expense`, `--warning`, `--chart-1..8`.
 - 3.3 Задать радиусы (`--radius: 8px`, `--radius-lg: 12px`) и шкалу отступов.
 - 3.4 Подключить Inter через `next/font/google` (subsets `latin`, `cyrillic`), добавить утилиту `tabular-nums` для сумм.
@@ -42,7 +44,7 @@
 - 5.4 Создать роут `app/api/auth/[...all]/route.ts` (`toNextJsHandler`).
 - 5.5 Создать `lib/auth-client.ts` (`createAuthClient`).
 - 5.6 Настроить Google OAuth: Google Cloud Console → OAuth Client → redirect `http://localhost:3000/api/auth/callback/google`; добавить ключи в env и `socialProviders.google`.
-- 5.7 Написать `middleware.ts` (проверка cookie, редирект на `/login?next=`).
+- 5.7 Написать `proxy.ts` (так в Next.js 16 называется middleware) (проверка cookie, редирект на `/login?next=`).
 - 5.8 Написать хелпер `requireUser()`.
 - 5.9 Сверстать `/login` и `/register` (react-hook-form + Zod, кнопка Google, ошибки, loading-состояние).
 - 5.10 Реализовать `db/seed.ts` — стандартные категории; вызывать в `databaseHooks.user.create.after`.

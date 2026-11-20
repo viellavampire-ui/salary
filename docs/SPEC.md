@@ -6,7 +6,7 @@
 
 | Слой | Технология | Зачем |
 |------|-----------|-------|
-| Фреймворк | **Next.js** (App Router, TypeScript strict) | SSR/RSC, Server Actions, роутинг |
+| Фреймворк | **Next.js 16** (App Router, Cache Components, TypeScript strict) | SSR/RSC, Server Actions, роутинг |
 | База данных | **Turso** (libSQL, SQLite-совместимая) | Managed, edge-реплики, бесплатный тариф |
 | Драйвер | `@libsql/client` | Подключение к Turso |
 | ORM / миграции | **Drizzle ORM** + `drizzle-kit` | Типобезопасные запросы, миграции |
@@ -26,7 +26,7 @@
 
 ```
 Браузер ──► Next.js (Vercel)
-              ├── middleware.ts         — проверка сессии, редирект на /login
+              ├── proxy.ts              — проверка cookie сессии, редирект на /login (в Next.js 16 middleware → proxy)
               ├── app/(auth)/*          — страницы входа/регистрации
               ├── app/(app)/*           — защищённые страницы (Server Components)
               ├── app/api/auth/[...all] — обработчик Better Auth
@@ -80,13 +80,14 @@ salary/
 ├── lib/
 │   ├── auth.ts                     # конфиг Better Auth (сервер)
 │   ├── auth-client.ts              # клиент Better Auth
+│   ├── dal.ts                      # getSession / requireUser
 │   ├── money.ts                    # копейки ↔ рубли, форматирование
 │   ├── period.ts                   # расчёт границ периодов
 │   └── validations.ts              # Zod-схемы
 ├── server/
 │   ├── actions/                    # transactions.ts, categories.ts, budgets.ts, settings.ts
 │   └── queries/                    # dashboard.ts, transactions.ts, analytics.ts, budgets.ts
-├── middleware.ts
+├── proxy.ts                        # бывший middleware.ts
 ├── drizzle.config.ts
 ├── tests/ (unit, e2e)
 └── .env.local
@@ -179,9 +180,10 @@ user 1──* budget *──1 category
 
 - `lib/auth.ts`: `betterAuth({ database: drizzleAdapter(db, { provider: 'sqlite' }), emailAndPassword: { enabled: true, minPasswordLength: 8 }, socialProviders: { google: {...} }, plugins: [nextCookies()] })`.
 - Роут: `app/api/auth/[...all]/route.ts` → `toNextJsHandler(auth)`.
-- `middleware.ts`: проверка наличия cookie сессии (`getSessionCookie`) для путей `/(app)/*`; без неё → редирект на `/login?next=...`.
+- `proxy.ts` (в Next.js 16 так называется middleware): проверка наличия cookie сессии (`getSessionCookie`) для путей `/(app)/*`; без неё → редирект на `/login?next=...`.
 - В Server Components/Actions — полноценная проверка: `auth.api.getSession({ headers: await headers() })`; при отсутствии — `redirect('/login')`.
-- Хелпер `requireUser()` в `lib/auth.ts` возвращает `user` или делает редирект.
+- Хелпер `requireUser()` в `lib/dal.ts` (Data Access Layer) возвращает `user` или делает редирект.
+- С `cacheComponents` чтение сессии допускается только внутри `<Suspense>`: страницы рендерят статичную оболочку, а блок с данными пользователя подгружается потоком.
 
 ## 7. Server Actions (мутации)
 

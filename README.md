@@ -2,21 +2,80 @@
 
 Веб-приложение для личного учёта доходов и расходов по категориям, с бюджетами и графиками.
 
-> **Статус:** этап планирования. Исходного кода приложения пока нет — в репозитории лежит проектная документация. Реализация идёт по плану из [`docs/task.md`](docs/task.md).
+> **Статус:** готовы шаги 1–5 из [`docs/task.md`](docs/task.md): проект на Next.js 16, дизайн-система, база данных (Turso + Drizzle), авторизация (Better Auth) и стандартные категории для новых пользователей. Дашборд пока временный: каркас с меню — шаг 6, графики — шаг 10.
 
 ## Возможности (MVP)
 
-- Регистрация и вход: email + пароль, Google
+- Регистрация и вход: email + пароль, Google ✅
 - Доходы и расходы по категориям (иконка + цвет)
 - Дашборд: доходы, расходы, баланс, норма сбережений и графики
 - Расходы по категориям, динамика за 12 месяцев, доходы по источникам
 - Бюджеты (месячные лимиты по категориям)
 - Аналитика за произвольный период, экспорт в CSV
-- Светлая и тёмная тема, адаптивность от телефона до десктопа
+- Светлая и тёмная тема ✅, адаптивность от телефона до десктопа
 
 ## Стек
 
-Next.js (App Router, TypeScript) · Turso (libSQL) · Drizzle ORM · Better Auth · Tailwind CSS + shadcn/ui · Recharts · Zod · Vercel
+Next.js 16 (App Router, Cache Components, TypeScript) · Turso (libSQL) · Drizzle ORM · Better Auth · Tailwind CSS 4 + компоненты в стиле shadcn/ui (Radix) · Lucide · Zod · react-hook-form · Vitest · Recharts (с шага 10) · Vercel
+
+## Быстрый старт
+
+Нужны Node.js 20+ и pnpm (`corepack enable`).
+
+```bash
+pnpm install
+cp .env.example .env.local
+```
+
+В `.env.local` заполните `BETTER_AUTH_SECRET` (`openssl rand -base64 32`). Для локальной разработки база — обычный файл `file:local.db`, Turso не обязателен. Ключи Google можно оставить пустыми: тогда кнопка «Войти через Google» скрыта.
+
+```bash
+pnpm db:migrate
+pnpm dev
+```
+
+Откройте http://localhost:3000.
+
+### Подключение Turso
+
+```bash
+turso db create salary
+turso db show salary --url
+turso db tokens create salary
+```
+
+Подставьте URL и токен в `TURSO_DATABASE_URL` и `TURSO_AUTH_TOKEN`, затем выполните `pnpm db:migrate`.
+
+## Команды
+
+| Команда | Что делает |
+|---------|-----------|
+| `pnpm dev` | Сервер разработки |
+| `pnpm build` / `pnpm start` | Продакшен-сборка и запуск |
+| `pnpm lint` · `pnpm typecheck` · `pnpm test` | ESLint · TypeScript · Vitest |
+| `pnpm format` | Prettier (с сортировкой классов Tailwind) |
+| `pnpm db:generate` | Создать миграцию из `db/schema.ts` |
+| `pnpm db:migrate` | Применить миграции |
+| `pnpm db:studio` | Просмотр базы в браузере |
+
+## Структура
+
+```
+app/
+  (auth)/login, (auth)/register   страницы входа и регистрации
+  (app)/dashboard                 защищённые страницы
+  api/auth/[...all]               обработчик Better Auth
+components/ui                     базовые компоненты (Button, Input, Card…)
+components/auth, categories, theme, layout
+db/schema.ts, db/migrations       схема и миграции Drizzle
+db/seed.ts                        стандартные категории
+lib/auth.ts, lib/dal.ts           конфиг Better Auth, проверка сессии
+lib/categories.ts                 иконки, палитра, стандартные категории
+proxy.ts                          редирект на /login без сессии
+server/queries                    чтение данных (всегда по userId)
+tests/                            unit-тесты
+docs/                             PRD, SPEC, дизайн, план
+```
 
 ## Документация
 
@@ -27,14 +86,3 @@ Next.js (App Router, TypeScript) · Turso (libSQL) · Drizzle ORM · Better Auth
 | [`docs/design.md`](docs/design.md) | Дизайн-система: цвета, типографика, экраны, графики, анимация |
 | [`docs/task.md`](docs/task.md) | Пошаговый технический план (1, 1.1, 1.2 …) |
 | [`docs/taskGuide.md`](docs/taskGuide.md) | Тот же план простыми словами для непрограммистов |
-
-## Быстрый старт (после реализации шагов 1–5)
-
-```bash
-pnpm install
-cp .env.example .env.local   # заполнить ключи Turso, Better Auth, Google
-pnpm db:migrate
-pnpm dev
-```
-
-Переменные окружения описаны в [`docs/SPEC.md`](docs/SPEC.md#4-переменные-окружения).
