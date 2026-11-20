@@ -31,6 +31,9 @@ export const auth = betterAuth({
       }
     : {},
   user: {
+    // Удаление аккаунта из настроек: с паролем (или «свежей» сессией для
+    // входа через Google). Данные удаляются каскадом по внешним ключам.
+    deleteUser: { enabled: true },
     additionalFields: {
       currency: {
         type: "string",

@@ -48,6 +48,37 @@ export function safeNextPath(next: string | null | undefined) {
   return next;
 }
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Введите текущий пароль"),
+    newPassword: password,
+    confirmPassword: z.string(),
+  })
+  .refine((v) => v.newPassword === v.confirmPassword, {
+    message: "Пароли не совпадают",
+    path: ["confirmPassword"],
+  })
+  .refine((v) => v.newPassword !== v.currentPassword, {
+    message: "Новый пароль совпадает с текущим",
+    path: ["newPassword"],
+  });
+
+/** Слово, которое нужно ввести для удаления аккаунта. */
+export const DELETE_CONFIRM_WORD = "УДАЛИТЬ";
+
+export const deleteAccountSchema = z.object({
+  confirm: z
+    .string()
+    .trim()
+    .refine((v) => v.toLocaleUpperCase("ru") === DELETE_CONFIRM_WORD, {
+      message: `Введите слово ${DELETE_CONFIRM_WORD}`,
+    }),
+  password: z.string().max(128).optional(),
+});
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
+
 /* ───────────── Операции, категории, бюджеты, настройки (шаг 7.3) ───────────── */
 
 /** Самая ранняя дата операции. */

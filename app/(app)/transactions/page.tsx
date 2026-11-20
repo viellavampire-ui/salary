@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 import { NewTransactionButton } from "@/components/layout/new-transaction-button";
 import { PageHeader } from "@/components/layout/page-header";
-import { PeriodPicker } from "@/components/layout/period-picker";
+import { UserPeriodPicker } from "@/components/layout/user-period-picker";
 import { TransactionsView } from "@/components/transactions/transactions-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireUser } from "@/lib/dal";
@@ -28,7 +28,7 @@ export default function TransactionsPage({
         title="Операции"
         actions={
           <>
-            <PeriodPicker />
+            <UserPeriodPicker />
             <NewTransactionButton />
           </>
         }

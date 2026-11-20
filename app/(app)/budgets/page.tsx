@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 import { BudgetsView } from "@/components/budgets/budgets-view";
 import { PageHeader } from "@/components/layout/page-header";
-import { PeriodPicker } from "@/components/layout/period-picker";
+import { UserPeriodPicker } from "@/components/layout/user-period-picker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireUser } from "@/lib/dal";
 import {
@@ -23,7 +23,7 @@ type SearchParams = PageProps<"/budgets">["searchParams"];
 export default function BudgetsPage({ searchParams }: PageProps<"/budgets">) {
   return (
     <>
-      <PageHeader title="Бюджеты" actions={<PeriodPicker />} />
+      <PageHeader title="Бюджеты" actions={<UserPeriodPicker />} />
       {/* Сессия и месяц из URL известны только во время запроса */}
       <Suspense fallback={<BudgetsSkeleton />}>
         <BudgetsContent searchParams={searchParams} />

@@ -10,7 +10,7 @@ import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import { EmptyState } from "@/components/layout/empty-state";
 import { NewTransactionButton } from "@/components/layout/new-transaction-button";
 import { PageHeader } from "@/components/layout/page-header";
-import { PeriodPicker } from "@/components/layout/period-picker";
+import { UserPeriodPicker } from "@/components/layout/user-period-picker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireUser } from "@/lib/dal";
 import { formatMoney, formatPercent } from "@/lib/money";
@@ -45,7 +45,7 @@ export default function DashboardPage({
         title="Дашборд"
         actions={
           <>
-            <PeriodPicker />
+            <UserPeriodPicker />
             <NewTransactionButton />
           </>
         }
