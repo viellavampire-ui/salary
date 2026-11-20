@@ -246,6 +246,8 @@ export function TransactionForm({
           <div className="relative">
             <Input
               id="tx-amount"
+              // форма грузится лениво — фокус ставим при её появлении
+              autoFocus={!editing}
               inputMode="decimal"
               autoComplete="off"
               placeholder="0"

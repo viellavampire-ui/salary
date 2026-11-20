@@ -188,12 +188,14 @@ function BudgetCard({
     <button
       type="button"
       onClick={onEdit}
-      aria-label={`${b.name}: потрачено ${formatMoney(b.spent, currency)} из ${formatMoney(b.limit, currency)}. Изменить лимит`}
       className="flex w-full flex-col gap-3 rounded-lg border bg-card p-4 text-left transition-colors duration-150 outline-none hover:border-primary/40 focus-visible:ring-[3px] focus-visible:ring-ring/50"
     >
       <span className="flex items-center gap-3">
         <CategoryIcon icon={b.icon} color={b.color} />
-        <span className="min-w-0 flex-1 truncate font-medium">{b.name}</span>
+        <span className="min-w-0 flex-1 truncate font-medium">
+          {b.name}
+          <span className="sr-only">: изменить лимит.</span>
+        </span>
         <BudgetStatusLabel status={b.status} />
       </span>
       <BudgetMeter

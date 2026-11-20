@@ -79,6 +79,7 @@ export function CategoryBarsCard({
                   <TooltipTrigger asChild>
                     <div
                       tabIndex={0}
+                      role="group"
                       aria-label={`${b.name}: ${formatMoney(b.total, currency)}, ${formatPercent(share)} ${totalLabel}`}
                       className="group grid grid-cols-[minmax(0,9rem)_1fr] items-center gap-3 rounded-md px-1 py-1.5 outline-none hover:bg-surface focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:grid-cols-[minmax(0,11rem)_1fr]"
                     >

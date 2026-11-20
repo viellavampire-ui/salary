@@ -44,8 +44,9 @@ export function UserMenu({
 
   return (
     <DropdownMenu>
+      {/* Без aria-label: видимое имя должно входить в доступное (WCAG 2.5.3),
+          поэтому «Меню профиля» — скрытым текстом рядом с именем */}
       <DropdownMenuTrigger
-        aria-label="Меню профиля"
         className={cn(
           "flex items-center gap-3 rounded-md text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
           variant === "sidebar" &&
@@ -53,6 +54,7 @@ export function UserMenu({
           variant === "compact" && "p-0.5",
         )}
       >
+        <span className="sr-only">Меню профиля</span>
         <UserAvatar name={user.name} image={user.image} />
         {variant === "sidebar" && (
           <>

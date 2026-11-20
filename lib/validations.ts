@@ -10,6 +10,10 @@ import {
   toISODate,
 } from "./period";
 
+// Без компиляции проверок через new Function: строгий CSP (next.config.ts)
+// запрещает eval, и даже проба Zod порождала бы нарушение политики.
+z.config({ jitless: true });
+
 const email = z
   .string()
   .trim()

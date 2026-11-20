@@ -97,13 +97,14 @@ function PeriodPickerInner({
           <ChevronRight className="size-4" />
         </Link>
       ) : (
-        <span
-          aria-disabled
+        <button
+          type="button"
+          disabled
           aria-label="Следующий месяц недоступен"
-          className={cn(arrowClass, "pointer-events-none opacity-40")}
+          className={cn(arrowClass, "opacity-40")}
         >
           <ChevronRight className="size-4" />
-        </span>
+        </button>
       )}
     </div>
   );

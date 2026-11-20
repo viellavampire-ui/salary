@@ -57,6 +57,11 @@ export const auth = betterAuth({
       },
     },
   },
+  // Ограничение частоты запросов (в т.ч. не больше 3 входов/регистраций за
+  // 10 секунд) — защита от перебора паролей. Отключается только для
+  // сквозных тестов (playwright.config.ts), которые создают много аккаунтов.
+  rateLimit:
+    process.env.E2E_DISABLE_RATE_LIMIT === "1" ? { enabled: false } : undefined,
   // nextCookies должен быть последним плагином
   plugins: [nextCookies()],
 });
