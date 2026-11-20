@@ -173,3 +173,12 @@ export function formatPercent(ratio: number, fractionDigits = 0): string {
     .format(ratio)
     .replace("-", MINUS);
 }
+
+/** Символ валюты: RUB → «₽», KZT → «₸». */
+export function currencySymbol(currency: string): string {
+  return (
+    formatter(currency, 0)
+      .formatToParts(0)
+      .find((p) => p.type === "currency")?.value ?? currency
+  );
+}

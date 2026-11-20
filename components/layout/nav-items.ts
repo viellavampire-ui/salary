@@ -35,9 +35,6 @@ export const MOBILE_NAV_ITEMS: NavItem[] = [
 /** Пункты, которые на телефоне доступны через меню профиля. */
 export const MOBILE_MENU_ITEMS: NavItem[] = [NAV_ITEMS[2], NAV_ITEMS[5]];
 
-/** Куда ведёт кнопка «+ Операция» (форма — шаг 9). */
-export const NEW_TRANSACTION_HREF = "/transactions?new=1";
-
 export function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }

@@ -125,6 +125,33 @@ export const transactionUpdateSchema = transactionSchema.extend({
   id: id("Операция не найдена"),
 });
 
+/**
+ * Копия удалённой операции для «Отменить». Приходит с клиента, поэтому
+ * проверяется так же строго, как новая операция (сумма — уже в копейках).
+ */
+export const transactionSnapshotSchema = z.object({
+  id: id("Операция не найдена"),
+  type: transactionType,
+  amount: z.number().int().positive().max(MAX_AMOUNT_MINOR),
+  categoryId: id("Выберите категорию"),
+  date: z.string().refine(isISODate, "Некорректная дата"),
+  note: z.string().max(200).nullable(),
+});
+
+/** Фильтры списка операций из URL. Некорректные значения просто игнорируются. */
+export const transactionFiltersSchema = z.object({
+  type: transactionType.optional().catch(undefined),
+  category: id("").optional().catch(undefined),
+  q: z
+    .string()
+    .trim()
+    .max(100)
+    .optional()
+    .catch(undefined)
+    .transform((v) => v || undefined),
+  page: z.coerce.number().int().min(1).max(10_000).optional().catch(undefined),
+});
+
 export const categorySchema = z.object({
   name: z
     .string({ error: "Введите название" })
@@ -159,6 +186,7 @@ export type TransactionFormValues = z.input<typeof transactionSchema>;
 /** Проверенные данные (сумма уже в копейках) */
 export type TransactionInput = z.output<typeof transactionSchema>;
 export type TransactionUpdateInput = z.output<typeof transactionUpdateSchema>;
+export type TransactionSnapshot = z.output<typeof transactionSnapshotSchema>;
 export type CategoryFormValues = z.input<typeof categorySchema>;
 export type CategoryInput = z.output<typeof categorySchema>;
 export type CategoryUpdateInput = z.output<typeof categoryUpdateSchema>;

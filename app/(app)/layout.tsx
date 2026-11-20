@@ -1,6 +1,7 @@
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { Sidebar } from "@/components/layout/sidebar";
+import { NewTransactionHost } from "@/components/transactions/new-transaction-host";
 
 /**
  * Каркас приложения (docs/design.md §5–6): сайдбар на планшете/десктопе,
@@ -21,6 +22,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
       <MobileNav />
+      <NewTransactionHost />
     </div>
   );
 }

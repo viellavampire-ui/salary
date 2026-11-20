@@ -8,8 +8,15 @@ import type { CategoryType } from "@/lib/categories";
 import type { DateRange } from "@/lib/period";
 import { listCategoriesWithTotals } from "@/server/data/categories";
 
-/** Активные категории пользователя. userId всегда берётся из сессии. */
-export async function getCategories(userId: string, type?: CategoryType) {
+/**
+ * Категории пользователя (по умолчанию только активные).
+ * userId всегда берётся из сессии.
+ */
+export async function getCategories(
+  userId: string,
+  type?: CategoryType,
+  { includeArchived = false }: { includeArchived?: boolean } = {},
+) {
   return db
     .select({
       id: categories.id,
@@ -17,12 +24,13 @@ export async function getCategories(userId: string, type?: CategoryType) {
       type: categories.type,
       icon: categories.icon,
       color: categories.color,
+      isArchived: categories.isArchived,
     })
     .from(categories)
     .where(
       and(
         eq(categories.userId, userId),
-        eq(categories.isArchived, false),
+        includeArchived ? undefined : eq(categories.isArchived, false),
         type ? eq(categories.type, type) : undefined,
       ),
     )

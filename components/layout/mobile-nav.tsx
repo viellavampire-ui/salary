@@ -5,11 +5,13 @@ import { usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { MOBILE_NAV_ITEMS, NEW_TRANSACTION_HREF, isActive } from "./nav-items";
+import { useOpenNewTransaction } from "@/components/transactions/new-transaction";
+import { MOBILE_NAV_ITEMS, isActive } from "./nav-items";
 
 /** Нижняя панель навигации на телефоне (< 768px) с кнопкой «+» по центру. */
 export function MobileNav() {
   const pathname = usePathname();
+  const openNew = useOpenNewTransaction();
   const left = MOBILE_NAV_ITEMS.slice(0, 2);
   const right = MOBILE_NAV_ITEMS.slice(2);
 
@@ -40,13 +42,14 @@ export function MobileNav() {
       <ul className="flex items-center">
         {left.map(item)}
         <li className="flex flex-1 justify-center">
-          <Link
-            href={NEW_TRANSACTION_HREF}
+          <button
+            type="button"
+            onClick={openNew}
             aria-label="Добавить операцию"
             className="-mt-5 inline-flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-popover ring-4 ring-background transition-colors duration-150 outline-none hover:bg-primary/90 focus-visible:ring-ring/50"
           >
             <Plus className="size-6" strokeWidth={2} />
-          </Link>
+          </button>
         </li>
         {right.map(item)}
       </ul>

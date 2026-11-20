@@ -1,17 +1,30 @@
-import Link from "next/link";
+"use client";
+
 import { Plus } from "lucide-react";
 
+import { useOpenNewTransaction } from "@/components/transactions/new-transaction";
 import { Button } from "@/components/ui/button";
-import { NEW_TRANSACTION_HREF } from "./nav-items";
+import { cn } from "@/lib/utils";
 
-/** Кнопка «+ Операция» в шапке страницы (на телефоне — кнопка «+» внизу). */
-export function NewTransactionButton() {
+/**
+ * Кнопка «+ Операция». variant="header" — в шапке страницы (на телефоне
+ * скрыта: там есть «+» в нижней панели), variant="inline" — видна всегда.
+ */
+export function NewTransactionButton({
+  variant = "header",
+  label = "Операция",
+}: {
+  variant?: "header" | "inline";
+  label?: string;
+}) {
+  const open = useOpenNewTransaction();
   return (
-    <Button asChild className="hidden md:inline-flex">
-      <Link href={NEW_TRANSACTION_HREF}>
-        <Plus />
-        Операция
-      </Link>
+    <Button
+      onClick={open}
+      className={cn(variant === "header" && "hidden md:inline-flex")}
+    >
+      <Plus />
+      {label}
     </Button>
   );
 }

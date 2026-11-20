@@ -316,3 +316,17 @@ export function previousPeriod(p: Period, monthStartDay = 1): Period {
 export function inRange(iso: ISODate, { from, to }: DateRange): boolean {
   return iso >= from && iso <= to;
 }
+
+const dayHeader = new Intl.DateTimeFormat("ru-RU", {
+  weekday: "short",
+  day: "numeric",
+  month: "long",
+  timeZone: "UTC",
+});
+
+/** Заголовок дня в списке операций: «пт, 20 ноября» (+ год, если не текущий). */
+export function formatDayHeader(iso: ISODate, currentYear?: number): string {
+  const label = dayHeader.format(toUTC(iso));
+  const year = Number(iso.slice(0, 4));
+  return currentYear && year !== currentYear ? `${label} ${year}` : label;
+}
