@@ -159,6 +159,7 @@ export type TransactionFormValues = z.input<typeof transactionSchema>;
 /** Проверенные данные (сумма уже в копейках) */
 export type TransactionInput = z.output<typeof transactionSchema>;
 export type TransactionUpdateInput = z.output<typeof transactionUpdateSchema>;
+export type CategoryFormValues = z.input<typeof categorySchema>;
 export type CategoryInput = z.output<typeof categorySchema>;
 export type CategoryUpdateInput = z.output<typeof categoryUpdateSchema>;
 export type BudgetFormValues = z.input<typeof budgetSchema>;

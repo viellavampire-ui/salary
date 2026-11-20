@@ -153,3 +153,68 @@ export const DEFAULT_CATEGORIES: {
   { name: "Проценты", type: "income", icon: "Percent", color: "amber" },
   { name: "Прочее", type: "income", icon: "Ellipsis", color: "slate" },
 ];
+
+/** Русские названия цветов — для подписей и программ чтения экрана. */
+export const CATEGORY_COLOR_LABELS: Record<CategoryColor, string> = {
+  indigo: "Индиго",
+  teal: "Бирюзовый",
+  amber: "Янтарный",
+  rose: "Розовый",
+  sky: "Голубой",
+  violet: "Фиолетовый",
+  lime: "Лаймовый",
+  slate: "Серый",
+};
+
+/** Русские подписи иконок. */
+export const CATEGORY_ICON_LABELS: Record<CategoryIconName, string> = {
+  ShoppingCart: "Тележка",
+  House: "Дом",
+  Car: "Автомобиль",
+  Bus: "Автобус",
+  Fuel: "Топливо",
+  Plane: "Самолёт",
+  Bike: "Велосипед",
+  UtensilsCrossed: "Столовые приборы",
+  Coffee: "Кофе",
+  Pizza: "Пицца",
+  HeartPulse: "Здоровье",
+  Pill: "Лекарства",
+  Dumbbell: "Спорт",
+  Shirt: "Одежда",
+  Scissors: "Ножницы",
+  Sparkles: "Красота",
+  Gamepad2: "Игры",
+  Film: "Кино",
+  Music: "Музыка",
+  Tv: "Телевизор",
+  Palette: "Хобби",
+  Wifi: "Интернет",
+  Smartphone: "Телефон",
+  Zap: "Электричество",
+  Wrench: "Ремонт",
+  GraduationCap: "Образование",
+  Book: "Книги",
+  Baby: "Дети",
+  Dog: "Питомцы",
+  Gift: "Подарок",
+  Receipt: "Чек",
+  CreditCard: "Карта",
+  Briefcase: "Работа",
+  Laptop: "Ноутбук",
+  Banknote: "Купюра",
+  Wallet: "Кошелёк",
+  Coins: "Монеты",
+  HandCoins: "Выплата",
+  PiggyBank: "Копилка",
+  Percent: "Проценты",
+  TrendingUp: "Рост",
+  Landmark: "Банк",
+  Building2: "Здание",
+  Ellipsis: "Прочее",
+};
+
+export const CATEGORY_TYPE_LABELS: Record<CategoryType, string> = {
+  expense: "Расходы",
+  income: "Доходы",
+};

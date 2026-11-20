@@ -1,6 +1,6 @@
 # Task — план реализации Salary
 
-> **Статус:** шаги 1–7 выполнены (шаг 1 — у каждого разработчика на своём компьютере). Следующий — шаг 8.
+> **Статус:** шаги 1–8 выполнены (шаг 1 — у каждого разработчика на своём компьютере). Следующий — шаг 9.
 
 Технический план. Нумерация совпадает с `taskGuide.md` (там те же шаги простыми словами).
 Ссылки: `PRD.md`, `SPEC.md`, `design.md`.
@@ -65,7 +65,7 @@
 
 ## 8. Категории
 - 8.1 `server/queries/categories.ts`: `getCategories(userId, type?)` с суммой за текущий месяц.
-- 8.2 `server/actions/categories.ts`: `createCategory`, `updateCategory`, `archiveCategory`.
+- 8.2 `server/actions/categories.ts`: `createCategory`, `updateCategory`, `archiveCategory`, `restoreCategory`. Логика — в `server/data/categories.ts` (принимает db, покрыта тестами, включая изоляцию пользователей).
 - 8.3 `IconPicker` (~40 иконок Lucide) и `ColorPicker` (8 цветов палитры).
 - 8.4 Страница `/categories`: вкладки «Расходы/Доходы», плитка, Sheet создания/редактирования.
 - 8.5 Пустые и loading-состояния.

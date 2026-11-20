@@ -5,6 +5,8 @@ import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { categories } from "@/db/schema";
 import type { CategoryType } from "@/lib/categories";
+import type { DateRange } from "@/lib/period";
+import { listCategoriesWithTotals } from "@/server/data/categories";
 
 /** Активные категории пользователя. userId всегда берётся из сессии. */
 export async function getCategories(userId: string, type?: CategoryType) {
@@ -25,4 +27,12 @@ export async function getCategories(userId: string, type?: CategoryType) {
       ),
     )
     .orderBy(asc(categories.sortOrder), asc(categories.name));
+}
+
+/** Все категории (с архивными) и суммы операций за период — для /categories. */
+export async function getCategoriesWithTotals(
+  userId: string,
+  range: DateRange,
+) {
+  return listCategoriesWithTotals(db, userId, range);
 }
