@@ -15,6 +15,13 @@
       "when": 1795203139556,
       "tag": "0001_fluffy_lockheed",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1795204149040,
+      "tag": "0002_tough_madrox",
+      "breakpoints": true
     }
   ]
 }

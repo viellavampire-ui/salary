@@ -16,6 +16,7 @@ const PUBLIC_PAGES = ["/", "/login", "/register"];
 const APP_PAGES = [
   "/dashboard",
   "/transactions",
+  "/transactions/recurring",
   "/categories",
   "/budgets",
   "/analytics",
@@ -104,6 +105,19 @@ for (const theme of ["light", "dark"] as const) {
         await page.context().close();
       });
     }
+
+    test("форма регулярной операции", async ({ browser }) => {
+      const page = await newPage(browser, { storageState: STATE });
+      await openReady(page, "/transactions/recurring", theme);
+      await page
+        .getByRole("button", { name: "Новая регулярная операция" })
+        .first()
+        .click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await page.waitForTimeout(300);
+      await expectNoAxeViolations(page);
+      await page.context().close();
+    });
 
     test("список уведомлений", async ({ browser }) => {
       const page = await newPage(browser, { storageState: STATE });

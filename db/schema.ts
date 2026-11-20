@@ -139,10 +139,16 @@ export const transactions = sqliteTable(
     /** YYYY-MM-DD */
     date: text("date").notNull(),
     note: text("note"),
+    /** Правило, которым создана операция (регулярные платежи); null — вручную */
+    recurringId: text("recurring_id").references(() => recurring.id, {
+      onDelete: "set null",
+    }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
+    // Одно правило — не больше одной операции на дату (защита от повторов)
+    uniqueIndex("transaction_recurring_date_uq").on(t.recurringId, t.date),
     index("transaction_user_date_idx").on(t.userId, t.date),
     index("transaction_user_category_date_idx").on(
       t.userId,
@@ -170,6 +176,44 @@ export const budgets = sqliteTable(
   },
   (t) => [uniqueIndex("budget_user_category_uq").on(t.userId, t.categoryId)],
 );
+
+/**
+ * Регулярные операции (подписки, аренда, зарплата). Даты повторов считаются
+ * от startDate: k-й повтор = startDate + k периодов (см. lib/recurring.ts).
+ * occurrences — сколько повторов уже обработано (созданы или пропущены).
+ */
+export const recurring = sqliteTable(
+  "recurring",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    categoryId: text("category_id")
+      .notNull()
+      .references(() => categories.id, { onDelete: "restrict" }),
+    type: text("type").$type<CategoryType>().notNull(),
+    /** Сумма в копейках */
+    amount: integer("amount").notNull(),
+    note: text("note"),
+    frequency: text("frequency").$type<RecurringFrequency>().notNull(),
+    /** YYYY-MM-DD — дата первого повтора и «якорь» расписания */
+    startDate: text("start_date").notNull(),
+    /** YYYY-MM-DD включительно; null — бессрочно */
+    endDate: text("end_date"),
+    occurrences: integer("occurrences").default(0).notNull(),
+    isPaused: integer("is_paused", { mode: "boolean" })
+      .default(false)
+      .notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("recurring_user_idx").on(t.userId)],
+);
+
+export type RecurringFrequency = "weekly" | "monthly" | "yearly";
 
 /**
  * Уведомления в приложении (сейчас — о бюджетах). Уникальный индекс
@@ -215,3 +259,4 @@ export type Category = typeof categories.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 export type Budget = typeof budgets.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type Recurring = typeof recurring.$inferSelect;

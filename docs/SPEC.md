@@ -178,6 +178,20 @@ GOOGLE_CLIENT_SECRET=...
 
 Индексы: `UNIQUE(userId, categoryId, month, kind)` — не больше одного уведомления на порог, бюджет и месяц; `INDEX(userId, createdAt)`.
 
+### 5.4b `recurring` и `transaction.recurringId`
+
+| Поле | Тип | Ограничения |
+|------|-----|-------------|
+| `id`, `userId` | TEXT | PK; FK → user.id, CASCADE |
+| `categoryId` | TEXT | FK → category.id, RESTRICT |
+| `type`, `amount`, `note` | | как у операции (сумма в копейках) |
+| `frequency` | TEXT | `'weekly' \| 'monthly' \| 'yearly'` |
+| `startDate` / `endDate` | TEXT | YYYY-MM-DD; конец необязателен (включительно) |
+| `occurrences` | INTEGER | сколько повторов уже обработано |
+| `isPaused` | INTEGER (bool) | |
+
+`transaction.recurringId` → recurring.id, **ON DELETE SET NULL** (удаление правила оставляет операции); `UNIQUE(recurringId, date)` — одно правило не создаст две операции на одну дату. Внимание: drizzle-kit для `ALTER TABLE ADD COLUMN` в SQLite теряет `ON DELETE` — в миграции `0002` он дописан вручную, тест «удаление правила оставляет операции» это проверяет.
+
 ### 5.5 Связи
 ```
 user 1──* category 1──* transaction
@@ -224,6 +238,14 @@ user 1──* budget *──1 category
 - Статус по `budgetStatus`: 80–100% → `budget_warning`, > 100% → `budget_over` (если траты сразу перескочили 100% — только «превышен»). Вставка `onConflictDoNothing` по уникальному индексу.
 - Actions возвращают `alerts` — только что созданные уведомления; клиент показывает всплывающие сообщения (`showBudgetAlerts`). Сбой проверки не ломает сохранение операции.
 - Колокольчик (`components/notifications`): счётчик непрочитанных в сайдбаре и шапке на телефоне, последние 20 уведомлений; клик ведёт на `/budgets?period=YYYY-MM` и отмечает прочитанным; `markNotificationsReadAction` — выбранные или все.
+
+## 7b. Регулярные операции
+
+- k-й повтор = `startDate` + k периодов (`lib/recurring.ts`), не цепочкой: «31 января каждый месяц» → 28 февраля, 31 марта.
+- `syncRecurring` (`server/data/recurring.ts`) создаёт операции с датой ≤ сегодня (не больше 120 за раз), затем сдвигает `occurrences`. Вызывается `syncRecurringAction` при открытии приложения (`RecurringSync` в `app/(app)/layout.tsx`) и сразу после создания/изменения правила. Отдельного планировщика нет: пропущенное догоняется при следующем визите.
+- Пауза и смена расписания не догоняют пропущенные даты (счёт с сегодня); изменение суммы/категории — только для будущих операций; правила архивных категорий ждут восстановления категории.
+- Созданные расходы проверяют пороги бюджетов (уведомления §7a).
+- UI: `/transactions/recurring` (кнопка «Регулярные» в «Операциях»), значок повтора у созданных операций.
 
 ## 8. Запросы и агрегации
 

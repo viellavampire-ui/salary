@@ -1,10 +1,13 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Repeat } from "lucide-react";
 
 import { NewTransactionButton } from "@/components/layout/new-transaction-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { UserPeriodPicker } from "@/components/layout/user-period-picker";
 import { TransactionsView } from "@/components/transactions/transactions-view";
+import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireUser } from "@/lib/dal";
 import { parsePeriod } from "@/lib/period";
@@ -29,6 +32,13 @@ export default function TransactionsPage({
         actions={
           <>
             <UserPeriodPicker />
+            <Link
+              href="/transactions/recurring"
+              className={buttonVariants({ variant: "secondary" })}
+            >
+              <Repeat />
+              Регулярные
+            </Link>
             <NewTransactionButton />
           </>
         }

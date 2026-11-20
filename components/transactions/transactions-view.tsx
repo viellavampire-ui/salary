@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   ArrowLeftRight,
+  Repeat,
   ChevronLeft,
   ChevronRight,
   SearchX,
@@ -35,6 +36,7 @@ export type TransactionRow = {
   categoryName: string;
   categoryIcon: string;
   categoryColor: CategoryColor;
+  recurringId?: string | null;
 };
 
 export function TransactionsView({
@@ -188,7 +190,18 @@ export function TransactionsView({
                           icon={t.categoryIcon}
                           color={t.categoryColor}
                         />
-                        <span className="font-medium">{t.categoryName}</span>
+                        <span className="font-medium">
+                          {t.categoryName}
+                          {t.recurringId && (
+                            <Repeat
+                              aria-label="регулярная"
+                              role="img"
+                              className="ml-1.5 inline size-3.5 text-muted-foreground"
+                            >
+                              <title>Регулярная операция</title>
+                            </Repeat>
+                          )}
+                        </span>
                       </button>
                     </td>
                     <td className="max-w-0 px-4 py-3 text-muted-foreground">
@@ -230,6 +243,15 @@ export function TransactionsView({
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-medium">
                             {t.categoryName}
+                            {t.recurringId && (
+                              <Repeat
+                                aria-label="регулярная"
+                                role="img"
+                                className="ml-1.5 inline size-3.5 text-muted-foreground"
+                              >
+                                <title>Регулярная операция</title>
+                              </Repeat>
+                            )}
                           </span>
                           {t.note && (
                             <span className="block truncate text-xs text-muted-foreground">

@@ -187,6 +187,32 @@ export const transactionFiltersSchema = z.object({
   page: z.coerce.number().int().min(1).max(10_000).optional().catch(undefined),
 });
 
+/** Правило регулярной операции (сумма — строкой из поля ввода). */
+export const recurringSchema = z
+  .object({
+    type: transactionType,
+    amount: amountSchema,
+    categoryId: id("Выберите категорию"),
+    frequency: z.enum(["weekly", "monthly", "yearly"], {
+      error: "Выберите периодичность",
+    }),
+    startDate: transactionDateSchema,
+    endDate: z
+      .string()
+      .optional()
+      .transform((v) => (v ? v : null))
+      .refine((v) => v === null || isISODate(v), "Некорректная дата"),
+    note,
+  })
+  .refine((v) => v.endDate === null || v.endDate >= v.startDate, {
+    message: "Дата окончания раньше даты начала",
+    path: ["endDate"],
+  });
+
+export const recurringUpdateSchema = recurringSchema.and(
+  z.object({ id: id("Правило не найдено") }),
+);
+
 export const categorySchema = z.object({
   name: z
     .string({ error: "Введите название" })
@@ -222,6 +248,9 @@ export type TransactionFormValues = z.input<typeof transactionSchema>;
 export type TransactionInput = z.output<typeof transactionSchema>;
 export type TransactionUpdateInput = z.output<typeof transactionUpdateSchema>;
 export type TransactionSnapshot = z.output<typeof transactionSnapshotSchema>;
+export type RecurringFormValues = z.input<typeof recurringSchema>;
+export type RecurringInput = z.output<typeof recurringSchema>;
+export type RecurringUpdateInput = z.output<typeof recurringUpdateSchema>;
 export type CategoryFormValues = z.input<typeof categorySchema>;
 export type CategoryInput = z.output<typeof categorySchema>;
 export type CategoryUpdateInput = z.output<typeof categoryUpdateSchema>;

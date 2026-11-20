@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { CategoryIcon } from "@/components/categories/category-icon";
+import { CategoryRadioGrid } from "@/components/categories/category-radio-grid";
 import { showBudgetAlerts } from "@/components/notifications/alert-toasts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -281,47 +280,11 @@ export function TransactionForm({
         </div>
 
         {/* Категория */}
-        <fieldset aria-invalid={Boolean(errors.categoryId)}>
-          <legend className="mb-2 text-sm font-medium">Категория</legend>
-          {options.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Нет активных категорий этого типа.{" "}
-              <Link
-                href="/categories"
-                className="text-primary underline-offset-4 hover:underline"
-              >
-                Создать категорию
-              </Link>
-            </p>
-          ) : (
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {options.map((c) => (
-                <label key={c.id} className="relative">
-                  <input
-                    type="radio"
-                    value={c.id}
-                    className="peer sr-only"
-                    {...register("categoryId")}
-                  />
-                  <span
-                    className={cn(
-                      "flex h-full cursor-pointer flex-col items-center gap-1.5 rounded-md border border-transparent p-2 text-center text-xs leading-4 transition-colors duration-150 hover:bg-surface",
-                      "peer-checked:border-primary peer-checked:bg-primary-soft peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50",
-                    )}
-                  >
-                    <CategoryIcon icon={c.icon} color={c.color} />
-                    <span className="line-clamp-2 break-words">{c.name}</span>
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
-          {errors.categoryId && (
-            <p className="mt-2 text-xs leading-4 text-expense">
-              {errors.categoryId.message}
-            </p>
-          )}
-        </fieldset>
+        <CategoryRadioGrid
+          options={options}
+          registration={register("categoryId")}
+          error={errors.categoryId?.message}
+        />
 
         {/* Дата */}
         <div className="flex flex-col gap-2">

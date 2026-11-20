@@ -1,6 +1,7 @@
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { Sidebar } from "@/components/layout/sidebar";
+import { RecurringSync } from "@/components/recurring/recurring-sync";
 import { NewTransactionHost } from "@/components/transactions/new-transaction-host";
 
 /**
@@ -23,6 +24,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
       <MobileNav />
       <NewTransactionHost />
+      <RecurringSync />
     </div>
   );
 }

@@ -65,7 +65,7 @@ const categoryError = (message: string) =>
  * allowArchivedId — архивная категория допустима, только если операция уже
  * в ней (редактирование суммы старой операции, восстановление удалённой).
  */
-async function checkCategory(
+export async function checkCategory(
   db: Database,
   userId: string,
   categoryId: string,
@@ -228,6 +228,7 @@ export async function listTransactions(
       categoryName: categories.name,
       categoryIcon: categories.icon,
       categoryColor: categories.color,
+      recurringId: transactions.recurringId,
     })
     .from(transactions)
     .innerJoin(categories, eq(categories.id, transactions.categoryId))

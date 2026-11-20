@@ -177,3 +177,39 @@ describe("budgetSchema и settingsSchema", () => {
     expect(errors.monthStartDay).toEqual(["Укажите число от 1 до 28"]);
   });
 });
+
+describe("recurringSchema", () => {
+  const valid = {
+    type: "expense",
+    amount: "45 000",
+    categoryId: "na2l3i7aq99t5pza29j6z5hk",
+    frequency: "monthly",
+    startDate: "2026-11-05",
+    endDate: "",
+    note: "",
+  };
+
+  it("сумма в копейках, пустые поля → null", async () => {
+    const { recurringSchema } = await import("@/lib/validations");
+    expect(recurringSchema.parse(valid)).toMatchObject({
+      amount: 4500000,
+      endDate: null,
+      note: null,
+    });
+  });
+
+  it("дата окончания не раньше начала, периодичность из списка", async () => {
+    const { recurringSchema } = await import("@/lib/validations");
+    const r = recurringSchema.safeParse({
+      ...valid,
+      endDate: "2026-11-01",
+      frequency: "daily",
+    });
+    const errors = fieldErrors(r.error!);
+    expect(errors.frequency).toEqual(["Выберите периодичность"]);
+    expect(
+      recurringSchema.safeParse({ ...valid, endDate: "2026-11-01" }).error
+        ?.issues[0].message,
+    ).toBe("Дата окончания раньше даты начала");
+  });
+});
