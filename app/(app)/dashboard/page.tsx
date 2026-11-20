@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ChartColumn } from "lucide-react";
 
+import { BudgetsAtRisk } from "@/components/dashboard/budgets-at-risk";
 import { CategoryBarsCard } from "@/components/dashboard/category-bars";
 import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
 import { KpiCard, Meter } from "@/components/dashboard/kpi-card";
@@ -141,6 +142,14 @@ async function DashboardContent({
           }
         />
       </div>
+
+      <BudgetsAtRisk
+        budgets={data.budgets}
+        currency={currency}
+        href={
+          period.kind === "month" ? `/budgets?period=${period.key}` : "/budgets"
+        }
+      />
 
       <IncomeExpenseChart
         data={data.trend}

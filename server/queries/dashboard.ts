@@ -7,6 +7,7 @@ import {
   previousPeriod,
   type Period,
 } from "@/lib/period";
+import { listBudgetProgress } from "@/server/data/budgets";
 import {
   getCategoryTotals,
   getKpis,
@@ -24,14 +25,29 @@ export async function getDashboard(
   const prev = previousPeriod(period, monthStartDay);
   const endMonth = monthKeyForDate(period.to, monthStartDay);
 
-  const [hasAny, kpis, expenses, incomes, trend, recent] = await Promise.all([
-    hasAnyTransactions(db, userId),
-    getKpis(db, userId, period, prev),
-    getCategoryTotals(db, userId, period, "expense"),
-    getCategoryTotals(db, userId, period, "income"),
-    getMonthlyTrend(db, userId, lastMonths(endMonth, 12), monthStartDay),
-    getRecentTransactions(db, userId, period, 5),
-  ]);
+  const [hasAny, kpis, expenses, incomes, trend, recent, budgets] =
+    await Promise.all([
+      hasAnyTransactions(db, userId),
+      getKpis(db, userId, period, prev),
+      getCategoryTotals(db, userId, period, "expense"),
+      getCategoryTotals(db, userId, period, "income"),
+      getMonthlyTrend(db, userId, lastMonths(endMonth, 12), monthStartDay),
+      getRecentTransactions(db, userId, period, 5),
+      // Бюджеты месячные: показываем их только для месяца
+      period.kind === "month"
+        ? listBudgetProgress(db, userId, period)
+        : Promise.resolve([]),
+    ]);
 
-  return { hasAny, kpis, expenses, incomes, trend, recent, prev, endMonth };
+  return {
+    hasAny,
+    kpis,
+    expenses,
+    incomes,
+    trend,
+    recent,
+    budgets,
+    prev,
+    endMonth,
+  };
 }
