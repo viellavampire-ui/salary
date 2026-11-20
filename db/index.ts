@@ -25,7 +25,7 @@ function createDb() {
   // поэтому PRAGMA выполнится раньше первого запроса. Turso это не нужно.
   if (url.startsWith("file:")) {
     void client
-      .executeMultiple("PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;")
+      .executeMultiple("PRAGMA busy_timeout = 5000; PRAGMA journal_mode = WAL;")
       .catch((error) => console.error("[db] PRAGMA", error));
   }
 

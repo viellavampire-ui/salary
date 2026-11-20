@@ -19,7 +19,7 @@
 
 ## Стек
 
-Next.js 16 (App Router, Cache Components, TypeScript) · Turso (libSQL) · Drizzle ORM · Better Auth · Tailwind CSS 4 + компоненты в стиле shadcn/ui (Radix) · Lucide · Zod · react-hook-form · Vitest · Recharts · Vercel
+Next.js 16 (App Router, Cache Components, TypeScript) · Turso (libSQL) · Drizzle ORM · Better Auth · Tailwind CSS 4 + компоненты в стиле shadcn/ui (Radix) · Lucide · Zod · react-hook-form · Vitest · Playwright · Recharts (дашборд) + свой SVG-график (аналитика) · Vercel
 
 ## Быстрый старт
 
