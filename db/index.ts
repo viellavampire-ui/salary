@@ -18,6 +18,17 @@ function createDb() {
     url,
     authToken: process.env.TURSO_AUTH_TOKEN || undefined,
   });
+
+  // Локальный файл SQLite: WAL — чтение не блокируется записью (например,
+  // открытой рядом `pnpm db:studio`), busy_timeout — ждать блокировку, а не
+  // сразу падать с SQLITE_BUSY. Запросы идут по одному соединению по очереди,
+  // поэтому PRAGMA выполнится раньше первого запроса. Turso это не нужно.
+  if (url.startsWith("file:")) {
+    void client
+      .executeMultiple("PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;")
+      .catch((error) => console.error("[db] PRAGMA", error));
+  }
+
   return drizzle(client, { schema });
 }
 

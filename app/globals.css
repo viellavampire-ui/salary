@@ -36,6 +36,13 @@
   --radius-lg: 12px;
 
   --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.08);
+
+  /* Цвета графиков: проверены валидатором палитры (яркость, насыщенность,
+     различимость при дальтонизме, контраст с фоном карточки) */
+  --chart-income: #059669;
+  --chart-expense: #dc2626;
+  --chart-balance: #4f46e5;
+  --chart-bar: #4f46e5;
 }
 
 .dark {
@@ -64,6 +71,13 @@
   --cat-slate: #94a3b8;
 
   --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.4);
+
+  /* В тёмной теме — свои шаги, а не те же цвета: светлые оттенки
+     выходят за допустимую яркость на тёмном фоне */
+  --chart-income: #059669;
+  --chart-expense: #ef4444;
+  --chart-balance: #6366f1;
+  --chart-bar: #6366f1;
 }
 
 /* Токены → утилиты Tailwind (bg-surface, text-income, rounded-lg …).
@@ -103,6 +117,10 @@
   --color-chart-6: var(--cat-violet);
   --color-chart-7: var(--cat-lime);
   --color-chart-8: var(--cat-slate);
+  --color-chart-income: var(--chart-income);
+  --color-chart-expense: var(--chart-expense);
+  --color-chart-balance: var(--chart-balance);
+  --color-chart-bar: var(--chart-bar);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius);
