@@ -2,7 +2,7 @@
 
 Веб-приложение для личного учёта доходов и расходов по категориям, с бюджетами и графиками.
 
-> **Статус:** готовы шаги 1–5 из [`docs/task.md`](docs/task.md): проект на Next.js 16, дизайн-система, база данных (Turso + Drizzle), авторизация (Better Auth) и стандартные категории для новых пользователей. Дашборд пока временный: каркас с меню — шаг 6, графики — шаг 10.
+> **Статус:** готовы шаги 1–6 из [`docs/task.md`](docs/task.md): проект на Next.js 16, дизайн-система, база данных (Turso + Drizzle), авторизация (Better Auth), стандартные категории и каркас приложения (сайдбар, нижняя панель на телефоне, меню профиля, выбор месяца). Разделы пока заглушки: операции — шаг 9, графики — шаг 10.
 
 ## Возможности (MVP)
 
@@ -63,10 +63,12 @@ turso db tokens create salary
 ```
 app/
   (auth)/login, (auth)/register   страницы входа и регистрации
-  (app)/dashboard                 защищённые страницы
+  (app)/layout.tsx                каркас: сайдбар, шапка и нижняя панель на телефоне
+  (app)/dashboard, transactions…  защищённые страницы
   api/auth/[...all]               обработчик Better Auth
 components/ui                     базовые компоненты (Button, Input, Card…)
-components/auth, categories, theme, layout
+components/layout                сайдбар, меню профиля, выбор месяца, заголовки
+components/auth, categories, theme
 db/schema.ts, db/migrations       схема и миграции Drizzle
 db/seed.ts                        стандартные категории
 lib/auth.ts, lib/dal.ts           конфиг Better Auth, проверка сессии

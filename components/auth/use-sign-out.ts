@@ -2,13 +2,11 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { LoaderCircle, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
-export function SignOutButton() {
+export function useSignOut() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -24,10 +22,5 @@ export function SignOutButton() {
     });
   }
 
-  return (
-    <Button variant="secondary" onClick={signOut} disabled={pending}>
-      {pending ? <LoaderCircle className="animate-spin" /> : <LogOut />}
-      Выйти
-    </Button>
-  );
+  return { signOut, pending };
 }
