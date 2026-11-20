@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
-const isHttps = (process.env.BETTER_AUTH_URL ?? "").startsWith("https://");
+const isHttps =
+  (process.env.BETTER_AUTH_URL ?? "").startsWith("https://") ||
+  process.env.VERCEL === "1";
 
 /**
  * Content-Security-Policy без nonce (docs/SPEC.md §12).

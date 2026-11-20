@@ -278,18 +278,25 @@ E2E поднимает собственный продакшен-сервер н
 
 ## 14. Деплой
 
-1. `turso db create salary` → получить URL и токен.
-2. `pnpm drizzle-kit migrate` на продовую БД.
-3. Vercel: подключить репозиторий, задать env, `BETTER_AUTH_URL` = продовый домен.
-4. Google Cloud Console: redirect URI `https://<домен>/api/auth/callback/google`.
+Пошагово, простыми словами — `docs/deploy.md`.
+
+1. `turso db create salary` → URL (`turso db show salary --url`) и токен (`turso db tokens create salary`).
+2. Vercel: импорт репозитория; env `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `BETTER_AUTH_SECRET` (Production + Preview).
+3. Сборка на Vercel идёт через скрипт `vercel-build`: `scripts/check-env.mjs` (понятные ошибки на русском) → `scripts/migrate.mjs` (миграции, идемпотентно) → `next build`.
+4. Адрес для Better Auth: `BETTER_AUTH_URL` (свой домен) → `VERCEL_PROJECT_PRODUCTION_URL` (Production) → `VERCEL_URL` (preview). Для `*.vercel.app` ничего задавать не нужно.
+5. Google (по желанию): redirect URI `https://<домен>/api/auth/callback/google`, env `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`.
+6. Проверка: `GET /api/health` → `{"status":"ok"}` (динамический, на каждый запрос проверяет базу; при сбое — `503`).
+7. CI: `.github/workflows/ci.yml` — lint, типы, unit, prettier, затем e2e Playwright.
 
 ## 15. Критерии готовности MVP
 
-- [ ] Регистрация, вход (email + Google), выход работают.
-- [ ] CRUD операций и категорий.
-- [ ] Дашборд показывает 4 KPI и 3 графика, корректно считает суммы.
-- [ ] Данные изолированы между пользователями (тест).
-- [ ] Светлая и тёмная тема соответствуют `design.md`.
-- [ ] Адаптивность 360–1920px.
-- [ ] Lighthouse: Performance ≥ 90, Accessibility ≥ 95.
-- [ ] Задеплоено на Vercel.
+Состояние на 20.11.2026:
+
+- [x] Регистрация, вход по email, выход работают (e2e). Вход через Google реализован, но **не проверен** — нужны ключи Google Cloud.
+- [x] CRUD операций и категорий (unit + e2e).
+- [x] Дашборд показывает 4 KPI и графики, корректно считает суммы (unit + e2e).
+- [x] Данные изолированы между пользователями (unit для всех разделов + e2e по HTTP).
+- [x] Светлая и тёмная тема соответствуют `design.md`; цвета графиков проверены валидатором палитры, контраст текста ≥ 4.5:1.
+- [x] Адаптивность: нет горизонтальной прокрутки на 360 / 768 / 1024 / 1440 px (e2e). 1920 px — тот же макет с max-width 1280px.
+- [~] Lighthouse (мобильный профиль): Accessibility 100 на всех страницах; Performance ≥ 90 везде, кроме «Аналитики» — 86 (на десктопе 100).
+- [ ] Задеплоено на Vercel — код и инструкция готовы (`docs/deploy.md`), нужны аккаунты Turso и Vercel владельца.

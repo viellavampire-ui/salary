@@ -14,8 +14,26 @@ const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 /** Включён ли вход через Google (заданы ли ключи в окружении). */
 export const isGoogleEnabled = Boolean(googleClientId && googleClientSecret);
 
+// Адрес сайта: BETTER_AUTH_URL (свой домен) → на Vercel основной адрес
+// проекта (VERCEL_PROJECT_PRODUCTION_URL) для Production → адрес конкретной
+// публикации (VERCEL_URL) для preview. Системные переменные Vercel
+// подставляются автоматически — для *.vercel.app ничего настраивать не нужно.
+const https = (host?: string) => (host ? `https://${host}` : undefined);
+const vercelUrl = https(process.env.VERCEL_URL);
+const vercelBranchUrl = https(process.env.VERCEL_BRANCH_URL);
+const vercelProductionUrl = https(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+
 export const auth = betterAuth({
   appName: "Salary",
+  baseURL:
+    process.env.BETTER_AUTH_URL ||
+    (process.env.VERCEL_ENV === "production"
+      ? vercelProductionUrl
+      : undefined) ||
+    vercelUrl,
+  trustedOrigins: [vercelUrl, vercelBranchUrl, vercelProductionUrl].filter(
+    (origin): origin is string => Boolean(origin),
+  ),
   database: drizzleAdapter(db, { provider: "sqlite", schema }),
   emailAndPassword: {
     enabled: true,
