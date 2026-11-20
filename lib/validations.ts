@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+import { CATEGORY_COLORS, isCategoryIconName } from "./categories";
+import { CURRENCY_CODES, MAX_AMOUNT_MINOR, toMinor } from "./money";
+import {
+  MAX_MONTH_START_DAY,
+  MIN_MONTH_START_DAY,
+  addMonths,
+  isISODate,
+  toISODate,
+} from "./period";
+
 const email = z
   .string()
   .trim()
@@ -36,4 +46,126 @@ export function safeNextPath(next: string | null | undefined) {
     return "/dashboard";
   }
   return next;
+}
+
+/* ───────────── Операции, категории, бюджеты, настройки (шаг 7.3) ───────────── */
+
+/** Самая ранняя дата операции. */
+export const MIN_TRANSACTION_DATE = "2000-01-01";
+
+const id = (message: string) => z.string().regex(/^[a-z0-9]{10,40}$/, message);
+
+const transactionType = z.enum(["income", "expense"], {
+  error: "Выберите доход или расход",
+});
+
+/**
+ * Сумма из поля ввода → копейки. Принимает «1 234,56», «1234.56».
+ * Результат — целое число > 0 и ≤ 999 999 999,99.
+ */
+export const amountSchema = z
+  .string({ error: "Введите сумму" })
+  .trim()
+  .min(1, "Введите сумму")
+  .transform((value, ctx) => {
+    const minor = toMinor(value);
+    if (minor === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Введите сумму числом, например 1 250,50",
+      });
+      return z.NEVER;
+    }
+    if (minor <= 0) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Сумма должна быть больше нуля",
+      });
+      return z.NEVER;
+    }
+    if (minor > MAX_AMOUNT_MINOR) {
+      ctx.addIssue({ code: "custom", message: "Слишком большая сумма" });
+      return z.NEVER;
+    }
+    return minor;
+  });
+
+/**
+ * Дата операции YYYY-MM-DD: существующая дата, не раньше 2000-01-01
+ * и не позже чем через год от сегодняшнего дня (момент проверки).
+ */
+export const transactionDateSchema = z
+  .string({ error: "Укажите дату" })
+  .refine(isISODate, "Некорректная дата")
+  .refine(
+    (d) => d >= MIN_TRANSACTION_DATE,
+    "Дата не может быть раньше 2000 года",
+  )
+  .refine(
+    (d) => d <= addMonths(toISODate(new Date()), 12),
+    "Дата не может быть больше чем через год",
+  );
+
+const note = z
+  .string()
+  .trim()
+  .max(200, "Комментарий не длиннее 200 символов")
+  .optional()
+  .transform((v) => (v ? v : null));
+
+export const transactionSchema = z.object({
+  type: transactionType,
+  amount: amountSchema,
+  categoryId: id("Выберите категорию"),
+  date: transactionDateSchema,
+  note,
+});
+
+export const transactionUpdateSchema = transactionSchema.extend({
+  id: id("Операция не найдена"),
+});
+
+export const categorySchema = z.object({
+  name: z
+    .string({ error: "Введите название" })
+    .trim()
+    .min(1, "Введите название")
+    .max(40, "Название не длиннее 40 символов"),
+  type: transactionType,
+  icon: z.string().refine(isCategoryIconName, "Выберите иконку"),
+  color: z.enum(CATEGORY_COLORS, { error: "Выберите цвет" }),
+});
+
+export const categoryUpdateSchema = categorySchema
+  .omit({ type: true })
+  .extend({ id: id("Категория не найдена") });
+
+export const budgetSchema = z.object({
+  categoryId: id("Выберите категорию"),
+  amount: amountSchema,
+});
+
+export const settingsSchema = z.object({
+  currency: z.enum(CURRENCY_CODES, { error: "Выберите валюту" }),
+  monthStartDay: z.coerce
+    .number({ error: "Укажите число от 1 до 28" })
+    .int("Укажите число от 1 до 28")
+    .min(MIN_MONTH_START_DAY, "Укажите число от 1 до 28")
+    .max(MAX_MONTH_START_DAY, "Укажите число от 1 до 28"),
+});
+
+/** Поля формы (то, что вводит пользователь) */
+export type TransactionFormValues = z.input<typeof transactionSchema>;
+/** Проверенные данные (сумма уже в копейках) */
+export type TransactionInput = z.output<typeof transactionSchema>;
+export type TransactionUpdateInput = z.output<typeof transactionUpdateSchema>;
+export type CategoryInput = z.output<typeof categorySchema>;
+export type CategoryUpdateInput = z.output<typeof categoryUpdateSchema>;
+export type BudgetFormValues = z.input<typeof budgetSchema>;
+export type BudgetInput = z.output<typeof budgetSchema>;
+export type SettingsInput = z.output<typeof settingsSchema>;
+
+/** Ошибки по полям для ответа Server Action: { amount: ["…"], … } */
+export function fieldErrors(error: z.ZodError) {
+  return z.flattenError(error).fieldErrors as Record<string, string[]>;
 }

@@ -7,9 +7,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  currentMonthKey,
   formatMonthLabel,
   isMonthKey,
-  monthKeyFromDate,
   shiftMonth,
   type MonthKey,
 } from "@/lib/period";
@@ -20,22 +20,35 @@ const arrowClass =
 
 /**
  * Переключатель месяца ◀ Ноябрь 2026 ▶. Выбранный месяц хранится в URL
- * (?period=YYYY-MM); без параметра — текущий месяц. Будущие месяцы недоступны.
+ * (?period=YYYY-MM); без параметра — текущий финансовый месяц
+ * (monthStartDay — день его начала из настроек). Будущие месяцы недоступны.
  */
-export function PeriodPicker({ className }: { className?: string }) {
+export function PeriodPicker({
+  className,
+  monthStartDay = 1,
+}: {
+  className?: string;
+  monthStartDay?: number;
+}) {
   // useSearchParams и текущая дата известны только во время запроса
   return (
     <Suspense fallback={<Skeleton className={cn("h-9 w-56", className)} />}>
-      <PeriodPickerInner className={className} />
+      <PeriodPickerInner className={className} monthStartDay={monthStartDay} />
     </Suspense>
   );
 }
 
-function PeriodPickerInner({ className }: { className?: string }) {
+function PeriodPickerInner({
+  className,
+  monthStartDay,
+}: {
+  className?: string;
+  monthStartDay: number;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const current = monthKeyFromDate(new Date());
+  const current = currentMonthKey(new Date(), monthStartDay);
   const raw = searchParams.get("period");
   const period = isMonthKey(raw) && raw <= current ? raw : current;
 
